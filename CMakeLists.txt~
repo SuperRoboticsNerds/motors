@@ -117,7 +117,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(motor_controller src/motor_controller.cpp)
 target_link_libraries(motor_controller ${catkin_LIBRARIES})
-add_dependencies(motor_controller motors_generate_messages_cpp)
+add_dependencies(motor_controller ras_lab1_motor_controller_generate_messages_cpp)
 
 ## Declare a C++ library
 # add_library(ras_lab1_ds_calib

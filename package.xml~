@@ -2,7 +2,7 @@
 <package>
   <name>motors</name>
   <version>0.0.0</version>
-  <description>The motors package</description>
+  <description>The ras_lab1_motor_controller package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
