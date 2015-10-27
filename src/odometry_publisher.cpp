@@ -6,7 +6,7 @@
 #include <nav_msgs/Odometry.h>
 #include <iostream>
 
-#define VEL_MULTIPLIER 0.001
+#define VEL_MULTIPLIER 65462
 #define ROT_MULTIPLIER 0.001
 
 ros::Publisher odom_pub;
@@ -18,6 +18,8 @@ double xpos,ypos,rot;
 double v_lin,v_rot;
 double aspeed,bspeed;
 double dt;
+double last_secs;
+bool started = false;
 
 
 
@@ -27,11 +29,21 @@ double dt;
 void WheelCallback(const ras_arduino_msgs::Encoders::ConstPtr& ticks)
 {
 
+  //first time, do nothing except initialize the time.
+  if (!started){
+    last_secs = ros::Time::now().toSec();
+    started = true;
+    return;
+  }
 
+  
+
+  last_secs = ros::Time::now().toSec();
 
   aspeed = (double)(ticks->delta_encoder1);
-  bspeed = (double)(ticks->delta_encoder2);
-  dt = (double)(ticks->timestamp);
+  bspeed = -(double)(ticks->delta_encoder2);
+  //dt = (double)(ticks->timestamp);
+  dt =  ros::Time::now().toSec() - last_secs ;
 
   v_lin = dt*VEL_MULTIPLIER*(r_r*aspeed - r_l*bspeed)/2.0;
   v_rot = dt*ROT_MULTIPLIER*(r_r*aspeed + r_l*bspeed)/B;
@@ -40,7 +52,6 @@ void WheelCallback(const ras_arduino_msgs::Encoders::ConstPtr& ticks)
   xpos += std::cos(rot)*v_lin;
   ypos += std::sin(rot)*v_lin;
 
-  std::cout << rot << std::endl;
 
   geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(rot);
 
@@ -74,8 +85,8 @@ int main(int argc, char **argv)
   ros::Subscriber sub = n.subscribe("/arduino/encoders", 100, WheelCallback);
    odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);
 
-  //std::cout << std::fixed << std::setprecision(9) << std::showpoint;
-  //double secs = ros::Time::now().toSec();
+  std::cout << std::fixed << std::setprecision(9) << std::showpoint;
+  
   //std::cout << secs;
     while(n.ok()){
         ros::spinOnce();
