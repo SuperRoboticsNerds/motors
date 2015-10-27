@@ -119,6 +119,9 @@ add_executable(motor_controller src/motor_controller.cpp)
 target_link_libraries(motor_controller ${catkin_LIBRARIES})
 add_dependencies(motor_controller motors_generate_messages_cpp)
 
+add_executable(odometry_publisher src/odometry_publisher.cpp)
+target_link_libraries(odometry_publisher ${catkin_LIBRARIES})
+
 ## Declare a C++ library
 # add_library(ras_lab1_ds_calib
 #   src/${PROJECT_NAME}/ras_lab1_ds_calib.cpp
