@@ -6,14 +6,15 @@
 #include <nav_msgs/Odometry.h>
 #include <iostream>
 
-#define VEL_MULTIPLIER 65462
-#define ROT_MULTIPLIER 0.001
+#define VEL_MULTIPLIER 1.0
+#define ROT_MULTIPLIER 1.0
+#define PI 3.14159265359
 
 ros::Publisher odom_pub;
 
 //ros::Time current_time_encoder, last_time_encoder;
 
-double B = 0.26, r_r = 0.05, r_l = 0.05;
+double B = 0.26, wheel_radius = 0.05;
 double xpos,ypos,rot;
 double v_lin,v_rot;
 double aspeed,bspeed;
@@ -40,13 +41,15 @@ void WheelCallback(const ras_arduino_msgs::Encoders::ConstPtr& ticks)
 
   last_secs = ros::Time::now().toSec();
 
-  aspeed = (double)(ticks->delta_encoder1);
-  bspeed = -(double)(ticks->delta_encoder2);
-  //dt = (double)(ticks->timestamp);
+
   dt =  ros::Time::now().toSec() - last_secs ;
 
-  v_lin = dt*VEL_MULTIPLIER*(r_r*aspeed - r_l*bspeed)/2.0;
-  v_rot = dt*ROT_MULTIPLIER*(r_r*aspeed + r_l*bspeed)/B;
+  aspeed = (double)(ticks->delta_encoder1)*PI/180.0;
+  bspeed = -(double)(ticks->delta_encoder2)*PI/180.0;
+  //dt = (double)(ticks->timestamp);
+
+  v_lin = VEL_MULTIPLIER*wheel_radius*(aspeed - bspeed)/2.0;
+  v_rot = ROT_MULTIPLIER*wheel_radius*(aspeed + bspeed)/B;
 
   rot += v_rot;
   xpos += std::cos(rot)*v_lin;
