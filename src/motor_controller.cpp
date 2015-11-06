@@ -6,7 +6,7 @@
 #include "geometry_msgs/Twist.h"
 #include <sstream>
 #include <math.h>
-
+#include <cmath>        // std::abs
 
 
 
@@ -34,8 +34,12 @@ public:
 	alpha2=6.0;
 	beta2 = 0.6;
 
+    turning_case=0;
 
 
+
+
+    //PID Values for going forward 
     Kp_left=7.65;
     Ki_left=3.8;
     Kd_left=0.15;
@@ -43,6 +47,17 @@ public:
     Kp_right=8.2;
     Ki_right=4.0;
     Kd_right=0.1;
+
+
+    //PID Values for turning when still 
+    Kp_left_turning=7.65;
+    Ki_left_turning=3.8;
+    Kd_left_turning=0.15;
+        
+    Kp_right_turning=8.2;
+    Ki_right_turning=4.0;
+    Kd_right_turning=0.1;
+
 
 /*
 	Kp_right=2.5;
@@ -96,19 +111,34 @@ void PWM_function()
 	error_right= desired_w_right - estimated_w_right;
 	error_left= desired_w_left - estimated_w_left;
 
-	// integral = integral + Dt*error
-	integral_right += Ki_right * (error_right)*0.10;//0.1;
-	integral_left += Ki_left * (error_left)*0.10;//0.1;
 
-	// derivate = (error - prerror)/Dt
-	derivative_right = Kd_right * (error_right - errorOld_right)/0.10;//0.1;//Dt
-	derivative_left = Kd_left * (error_left - errorOld_left)/0.10;//0.1;//Dt
-	
-	//Output = Kp*error +Ki*integral +kd*derivate
-	pwm_msg.PWM1 = (-1)*(Kp_right * (error_right) + integral_right+derivative_right) ;
-	pwm_msg.PWM2 = (Kp_left * (error_left) + integral_left+derivative_left);
-	//pwm_msg.PWM1 = estimated_w_left;
-    	//pwm_msg.PWM2 = desired_w_left;
+    if(turning_case==0){ 
+	   // integral = integral + Dt*error
+    	integral_right += Ki_right * (error_right)*0.10;//0.1;
+    	integral_left += Ki_left * (error_left)*0.10;//0.1;
+
+    	// derivate = (error - prerror)/Dt
+    	derivative_right = Kd_right * (error_right - errorOld_right)/0.10;//0.1;//Dt
+    	derivative_left = Kd_left * (error_left - errorOld_left)/0.10;//0.1;//Dt
+    	
+    	//Output = Kp*error +Ki*integral +kd*derivate
+    	pwm_msg.PWM1 = (-1)*(Kp_right * (error_right) + integral_right+derivative_right) ;
+    	pwm_msg.PWM2 = (Kp_left * (error_left) + integral_left+derivative_left);
+    	//pwm_msg.PWM1 = estimated_w_left;
+        	//pwm_msg.PWM2 = desired_w_left;
+
+    }else{
+        integral_right += Ki_right_turning * (error_right)*0.10;//0.1;
+        integral_left += Ki_left_turning * (error_left)*0.10;//0.1;
+
+        // derivate = (error - prerror)/Dt
+        derivative_right = Kd_right_turning * (error_right - errorOld_right)/0.10;//0.1;//Dt
+        derivative_left = Kd_left_turning * (error_left - errorOld_left)/0.10;//0.1;//Dt
+        
+        //Output = Kp*error +Ki*integral +kd*derivate
+        pwm_msg.PWM1 = (-1)*(Kp_right_turning * (error_right) + integral_right+derivative_right) ;
+        pwm_msg.PWM2 = (Kp_left_turning * (error_left) + integral_left+derivative_left);
+    }
 
 	errorOld_right=error_right;
 	errorOld_left=error_left;
@@ -122,6 +152,15 @@ void PWM_function()
     }
 void twist_function(const geometry_msgs::Twist twist_msg)
     {
+
+    if (std::abs(twist_msg.linear.x) <=1.0e-5 && std::abs(twist_msg.angular.z)>1.0e-5){
+        turning_case=1;
+    }
+    else{
+
+        turning_case=0;
+    }
+
 	desired_w_right = ((twist_msg.linear.x)+(base_/2)*twist_msg.angular.z)/wheel_radius_;
 
 	desired_w_left = ((twist_msg.linear.x)-(base_/2)*twist_msg.angular.z)/wheel_radius_;
@@ -143,7 +182,7 @@ private:
     ras_arduino_msgs::PWM pwm_msg;
    
 
-   //variable declaration for motor one
+    //variable declaration for motor one
     double estimated_w_right;
     double desired_w_right;
     double integral_right;
@@ -153,6 +192,9 @@ private:
     double Ki_right;
     double Kd_right;
     double Kp_right;
+    double Kp_right_turning;
+    double Ki_right_turning;
+    double Kd_right_turning;
 
 
     //variable declaration for motor two
@@ -165,6 +207,12 @@ private:
     double Ki_left;
     double Kd_left;
     double Kp_left;
+    double Kp_left_turning;
+    double Ki_left_turning;
+    double Kd_left_turning;
+
+
+    double turning_case;
 
 };
 

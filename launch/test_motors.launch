@@ -5,6 +5,12 @@
   <node
  name="motor_controller" pkg="motors" type="motor_controller" />
 
+  <node
+ name="odometry_publisher" pkg="motors" type="odometry_publisher" />
+
+   <node
+ name="manual_control" pkg="manual_control" type="joystick_control.py" />
+
 
 <param name="/serial_node/port" value="/dev/ttyACM0" />
 
