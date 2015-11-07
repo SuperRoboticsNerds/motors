@@ -50,13 +50,13 @@ public:
 
 
     //PID Values for turning when still 
-    Kp_left_turning=7.65;
-    Ki_left_turning=3.8;
-    Kd_left_turning=0.15;
+    Kp_left_turning=7.0;
+    Ki_left_turning=15.0;
+    Kd_left_turning=0.20;
         
-    Kp_right_turning=8.2;
-    Ki_right_turning=4.0;
-    Kd_right_turning=0.1;
+    Kp_right_turning=7.0;
+    Ki_right_turning=15.0;
+    Kd_right_turning=0.20;
 
 
 /*
