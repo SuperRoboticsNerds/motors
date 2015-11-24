@@ -6,7 +6,7 @@
 #include "geometry_msgs/Twist.h"
 #include <sstream>
 #include <math.h>
-#include <cmath>        // std::abs
+#include <cmath>
 
 
 
@@ -25,27 +25,27 @@ public:
         n = ros::NodeHandle("~");
         //motor_controller_ = new KobukiMotors();
 
-        wheel_radius_ = 0.05;
-        base_ = 0.208;
+    wheel_radius_ = 0.05;
+    base_ = 0.21;
 	
-	alpha1=4.0;
-	beta1 = 0.4;
+    alpha1 = 4.0;
+    beta1 = 0.4;
 
-	alpha2=6.0;
-	beta2 = 0.6;
+    alpha2 = 6.0;
+    beta2 = 0.6;
 
-    turning_case=0;
+    turning_case = 0;
 
 
 
 
     //PID Values for going forward 
-    Kp_left=7.65;
-    Ki_left=3.8;
+    Kp_left=10.0;
+    Ki_left=1.0;
     Kd_left=0.15;
         
-    Kp_right=8.2;
-    Ki_right=4.0;
+    Kp_right=10.0;
+    Ki_right=1.0;
     Kd_right=0.1;
 
 
@@ -88,10 +88,10 @@ public:
 void encoder_function(const ras_arduino_msgs::Encoders encoders_msg)
     {// degree/millisecond
 	//_right
-	  estimated_w_right = (encoders_msg.delta_encoder1*2*M_PI*10)/(360);
+      estimated_w_right = (encoders_msg.delta_encoder1*2.0*M_PI*10.0)/(360.0);
 
 	//_left
-	  estimated_w_left = (encoders_msg.delta_encoder2*2*M_PI*10)/(360);
+      estimated_w_left = (encoders_msg.delta_encoder2*2.0*M_PI*10.0)/(360.0);
 
 	//estimated_w= ((estimated_w_left-estimated_w_right)/base_)*wheel_radius_;
     }
@@ -108,8 +108,8 @@ void PWM_function()
     	//pwm_msg.PWM2 = desired_w_left;
 
 	//error
-	error_right= desired_w_right - estimated_w_right;
-	error_left= desired_w_left - estimated_w_left;
+    error_right = desired_w_right - estimated_w_right;
+    error_left = desired_w_left - estimated_w_left;
 
 
     if(turning_case==0){ 
@@ -136,7 +136,7 @@ void PWM_function()
         derivative_left = Kd_left_turning * (error_left - errorOld_left)/0.10;//0.1;//Dt
         
         //Output = Kp*error +Ki*integral +kd*derivate
-        pwm_msg.PWM1 = (-1)*(Kp_right_turning * (error_right) + integral_right+derivative_right) ;
+        pwm_msg.PWM1 = (-1.0)*(Kp_right_turning * (error_right) + integral_right+derivative_right) ;
         pwm_msg.PWM2 = (Kp_left_turning * (error_left) + integral_left+derivative_left);
     }
 
@@ -154,16 +154,16 @@ void twist_function(const geometry_msgs::Twist twist_msg)
     {
 
     if (std::abs(twist_msg.linear.x) <=1.0e-5 && std::abs(twist_msg.angular.z)>1.0e-5){
-        turning_case=1;
+        turning_case=0;
     }
     else{
 
         turning_case=0;
     }
 
-	desired_w_right = ((twist_msg.linear.x)+(base_/2)*twist_msg.angular.z)/wheel_radius_;
+    desired_w_right = ((twist_msg.linear.x)+(base_/2.0)*twist_msg.angular.z)/wheel_radius_;
 
-	desired_w_left = ((twist_msg.linear.x)-(base_/2)*twist_msg.angular.z)/wheel_radius_;
+    desired_w_left = ((twist_msg.linear.x)-(base_/2.0)*twist_msg.angular.z)/wheel_radius_;
      }
 
 private:

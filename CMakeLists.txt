@@ -49,6 +49,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   FILES
 #   Data.msg
 # )
+add_message_files(
+	FILES
+	pid.msg
+	odometry.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -118,6 +123,9 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(motor_controller src/motor_controller.cpp)
 target_link_libraries(motor_controller ${catkin_LIBRARIES})
 add_dependencies(motor_controller motors_generate_messages_cpp)
+
+add_executable(fixed_motor_controller src/fixed_motor_controller.cpp)
+target_link_libraries(fixed_motor_controller ${catkin_LIBRARIES})
 
 add_executable(odometry_publisher src/odometry_publisher.cpp)
 target_link_libraries(odometry_publisher ${catkin_LIBRARIES})
