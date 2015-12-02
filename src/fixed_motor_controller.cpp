@@ -13,7 +13,7 @@
 #define PI 3.14159265359
 
 double wheel_radius = 0.05;
-double base = 0.21;
+double wheel_base = 0.21;
 
 //PID Values
 double Kp_left = 9.0;
@@ -62,7 +62,7 @@ void encoder_function(const ras_arduino_msgs::Encoders encoders_msg)
 
     motors::odometry odom_msg;
     odom_msg.v = (estimated_w_right + estimated_w_left)*wheel_radius/2.0;
-    odom_msg.w = (estimated_w_right - estimated_w_left)*wheel_radius/base;
+    odom_msg.w = (estimated_w_right - estimated_w_left)*wheel_radius/wheel_base;
     v_tot += odom_msg.v*dt;
     w_tot += odom_msg.w*dt;
     odom_msg.v_tot = v_tot;
@@ -114,11 +114,33 @@ void PWM_function()
 
 void twist_function(const geometry_msgs::Twist twist_msg)
     {
-        desired_w_right = (twist_msg.linear.x+(base/2.0)*twist_msg.angular.z)/wheel_radius;
-        desired_w_left = (twist_msg.linear.x-(base/2.0)*twist_msg.angular.z)/wheel_radius;
+        desired_w_right = (twist_msg.linear.x+(wheel_base/2.0)*twist_msg.angular.z)/wheel_radius;
+        desired_w_left = (twist_msg.linear.x-(wheel_base/2.0)*twist_msg.angular.z)/wheel_radius;
         if (desired_w_right < 1e-5){integral_right = 0.0;}
         if (desired_w_left < 1e-5){integral_left = 0.0;}
     }
+
+
+bool setup(ros::NodeHandle nh){
+    bool paramtest;
+    nh.getParam("/has_parameters", paramtest);
+    if(!paramtest){
+        return false;
+    }
+
+    nh.getParam("/Kp_left", Kp_left);
+    nh.getParam("/Ki_left", Ki_left);
+    nh.getParam("/Kd_left", Kd_left);
+
+    nh.getParam("/Kp_right", Kp_right);
+    nh.getParam("/id_right", Ki_right);
+    nh.getParam("/Kd_right", Kd_right);
+
+    nh.getParam("/wheel_radius", wheel_radius);
+    nh.getParam("/wheel_base", wheel_base);
+
+    return true;
+}
 
 
 int main(int argc, char **argv)
@@ -127,6 +149,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "good_motor_controller");
 
     ros::NodeHandle n;
+
+    if(!setup(n)){
+        return 1;
+    }
 
     encoders_sub_ = n.subscribe("/arduino/encoders",100,encoder_function);
     twist_sub_ = n.subscribe<geometry_msgs::Twist>("/motor_controller/twist",100,twist_function);
