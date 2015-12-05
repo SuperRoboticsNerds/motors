@@ -116,8 +116,8 @@ void twist_function(const geometry_msgs::Twist twist_msg)
     {
         desired_w_right = (twist_msg.linear.x+(wheel_base/2.0)*twist_msg.angular.z)/wheel_radius;
         desired_w_left = (twist_msg.linear.x-(wheel_base/2.0)*twist_msg.angular.z)/wheel_radius;
-        if (std::abs(desired_w_right) < 1e-5){integral_right = 0.0;}
-        if (std::abs(desired_w_left) < 1e-5){integral_left = 0.0;}
+        if (std::fabs(desired_w_right) < 1e-5){integral_right = 0.0;}
+        if (std::fabs(desired_w_left) < 1e-5){integral_left = 0.0;}
     }
 
 
