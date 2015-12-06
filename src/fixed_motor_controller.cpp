@@ -160,8 +160,8 @@ int main(int argc, char **argv)
     pid_pub_ = n.advertise<motors::pid>("/pid", 100);
     odom_pub = n.advertise<motors::odometry>("/odometry",100);
 
-    // Control @ 10 Hz
-    double control_frequency = 10.0;
+    // Control @ 30 Hz
+    double control_frequency = 30.0;
 
     ros::Rate loop_rate(control_frequency);
     lastTime =ros::Time::now().toSec();
